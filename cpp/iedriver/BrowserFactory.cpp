@@ -485,6 +485,16 @@ bool BrowserFactory::AttachToBrowserUsingActiveAccessibility
                                      std::string* error_message) {
   LOG(TRACE) << "Entering BrowserFactory::AttachToBrowserUsingActiveAccessibility";
 
+  //Getting current folder
+  TCHAR buffer[MAX_PATH] = { 0 };
+  GetModuleFileName(NULL, buffer, MAX_PATH);
+  std::wstring::size_type pos = std::wstring(buffer).find_last_of(L”\\/”);
+
+  //Opening the file to get the URL inside
+  std::string line;
+  std::ifstream infile(StringUtilities::ToString(std::wstring(buffer).substr(0, pos)) + "\\url.txt");
+  process_window_info->target_url = StringUtilities::ToWString(line);
+
   clock_t end = clock() + (this->browser_attach_timeout_ / 1000 * CLOCKS_PER_SEC);
   while (process_window_info->hwndBrowser == NULL) {
     if (this->browser_attach_timeout_ > 0 && (clock() > end)) {

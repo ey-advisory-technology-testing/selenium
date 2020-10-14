@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{19417464-5B84-45FE-BE6B-7A01D4B8D412}</ProjectGuid>
     <RootNamespace>civetweb</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -80,6 +80,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\..\..\build\cpp\lib\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\..\..\build\cpp\intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(VC_IncludePath_x86);$(IncludePath)</IncludePath>
+    <ExecutablePath>$(CommonExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\..\..\build\cpp\lib\$(Platform)\$(Configuration)\</OutDir>
@@ -101,6 +103,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NO_SSL;USE_IPV6;WIN32;_TIMESPEC_DEFINED;_DEBUG;_LIB;_USING_V110_SDK71_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
