@@ -13,7 +13,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#include <windows.h>
 #include "BrowserFactory.h"
 
 #include <ctime>
@@ -25,6 +25,7 @@
 #include <sddl.h>
 #include <shlguid.h>
 #include <shlobj.h>
+#include <fstream>
 
 #include "logging.h"
 
@@ -32,6 +33,9 @@
 #include "RegistryUtilities.h"
 #include "StringUtilities.h"
 #include "WebDriverConstants.h"
+#include "../../../../../../Program Files (x86)/Windows Kits/8.1/Include/um/WinSock2.h"
+#include <filesystem>
+#include <filesystem>
 
 #define HTML_GETOBJECT_MSG L"WM_HTML_GETOBJECT"
 #define OLEACC_LIBRARY_NAME L"OLEACC.DLL"
@@ -92,6 +96,9 @@
 
 namespace webdriver {
 
+  HINSTANCE BrowserFactory::oleacc_instance_handle_;
+  UINT BrowserFactory::html_getobject_msg_;
+
 BrowserFactory::BrowserFactory(void) {
   // Must be done in the constructor. Do not move to Initialize().
   this->GetExecutableLocation();
@@ -129,6 +136,10 @@ void BrowserFactory::Initialize(BrowserFactorySettings settings) {
   this->edge_executable_location_ = StringUtilities::ToWString(settings.edge_executable_path);
   LOG(DEBUG) << "path after was " << this->edge_executable_location_.c_str() << "\n";
   this->html_getobject_msg_ = ::RegisterWindowMessage(HTML_GETOBJECT_MSG);
+  MessageBox(NULL, StringUtilities::ToWString(settings.wpf_window_title).c_str(), L"Hello, World!", MB_OK);
+  this->wpf_window_title = settings.wpf_window_title;
+  MessageBox(NULL, StringUtilities::ToWString(this->wpf_window_title).c_str(), L"Hello, World!", MB_OK);
+  this->find_with_url = settings.find_with_url;
 
   // Explicitly load MSAA so we know if it's installed
   this->oleacc_instance_handle_ = ::LoadLibrary(OLEACC_LIBRARY_NAME);
@@ -186,7 +197,7 @@ DWORD BrowserFactory::LaunchBrowserProcess(std::string* error_message) {
     PROCESS_INFORMATION proc_info;
     ::ZeroMemory(&proc_info, sizeof(proc_info));
 
-    if (this->edge_ie_mode_) {
+   /* if (this->edge_ie_mode_) {
       this->LaunchEdgeInIEMode(&proc_info, error_message);
     } else if (!use_createprocess_api) {
       this->LaunchBrowserUsingIELaunchURL(&proc_info, error_message);
@@ -216,7 +227,8 @@ DWORD BrowserFactory::LaunchBrowserProcess(std::string* error_message) {
       size_t last_delimiter = full_image_path.find_last_of('\\');
       std::string image_name = StringUtilities::ToString(full_image_path.substr(last_delimiter + 1, buffer_count - last_delimiter));
       LOG(DEBUG) << "Process with ID " << process_id << " is executing " << image_name;
-    }
+    }*/
+    return 1;
 
     if (proc_info.hThread != NULL) {
       ::CloseHandle(proc_info.hThread);
@@ -388,18 +400,18 @@ bool BrowserFactory::GetDocumentFromWindowHandle(HWND window_handle,
                                                  IHTMLDocument2** document) {
   LOG(TRACE) << "Entering BrowserFactory::GetDocumentFromWindowHandle";
 
-  if (window_handle != NULL && this->oleacc_instance_handle_) {
+  if (window_handle != NULL && oleacc_instance_handle_) {
     LRESULT result;
 
     ::SendMessageTimeout(window_handle,
-                         this->html_getobject_msg_,
+                         html_getobject_msg_,
                          0L,
                          0L,
                          SMTO_ABORTIFHUNG,
                          1000,
                          reinterpret_cast<PDWORD_PTR>(&result));
 
-    LPFNOBJECTFROMLRESULT object_pointer = reinterpret_cast<LPFNOBJECTFROMLRESULT>(::GetProcAddress(this->oleacc_instance_handle_, "ObjectFromLresult"));
+    LPFNOBJECTFROMLRESULT object_pointer = reinterpret_cast<LPFNOBJECTFROMLRESULT>(::GetProcAddress(oleacc_instance_handle_, "ObjectFromLresult"));
     if (object_pointer != NULL) {
       HRESULT hr;
       hr = (*object_pointer)(result,
@@ -475,8 +487,7 @@ bool BrowserFactory::IsBrowserProcessInitialized(DWORD process_id) {
   info.hwndBrowser = NULL;
   info.pBrowser = NULL;
 
-  ::EnumWindows(&BrowserFactory::FindBrowserWindow,
-                reinterpret_cast<LPARAM>(&info));
+  ::EnumWindows(&BrowserFactory::FindBrowserWindow, reinterpret_cast<LPARAM>(&info));
   return info.hwndBrowser != NULL;
 }
 
@@ -484,16 +495,24 @@ bool BrowserFactory::AttachToBrowserUsingActiveAccessibility
                                     (ProcessWindowInfo* process_window_info,
                                      std::string* error_message) {
   LOG(TRACE) << "Entering BrowserFactory::AttachToBrowserUsingActiveAccessibility";
-
+  /*
   //Getting current folder
   TCHAR buffer[MAX_PATH] = { 0 };
   GetModuleFileName(NULL, buffer, MAX_PATH);
-  std::wstring::size_type pos = std::wstring(buffer).find_last_of(L”\\/”);
-
+  std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+  std::wstring path = StringUtilities::ToWString(StringUtilities::ToString(std::wstring(buffer).substr(0, pos)) + "\\url.txt");
+  MessageBox(NULL, path.c_str(), L"Hello, World!", MB_OK);
   //Opening the file to get the URL inside
   std::string line;
   std::ifstream infile(StringUtilities::ToString(std::wstring(buffer).substr(0, pos)) + "\\url.txt");
-  process_window_info->target_url = StringUtilities::ToWString(line);
+  std::getline(infile, line);
+  */
+  process_window_info->target_url = StringUtilities::ToWString(this->find_with_url);
+  MessageBox(NULL, StringUtilities::ToWString(this->wpf_window_title).c_str(), L"Hello, World!", MB_OK);
+  strcpy(process_window_info->wpf_window_title, this->wpf_window_title.c_str());
+
+
+  MessageBox(NULL, L"URL is...", process_window_info->target_url.c_str(), MB_OK);
 
   clock_t end = clock() + (this->browser_attach_timeout_ / 1000 * CLOCKS_PER_SEC);
   while (process_window_info->hwndBrowser == NULL) {
@@ -1013,21 +1032,53 @@ void BrowserFactory::InvokeClearCacheUtility(bool use_low_integrity_level) {
   }
 }
 
+std::wstring s2ws(const std::string& str)
+{
+  int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+  std::wstring wstrTo(size_needed, 0);
+  MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+  return wstrTo;
+}
+
+
+
 BOOL CALLBACK BrowserFactory::FindBrowserWindow(HWND hwnd, LPARAM arg) {
   // Could this be an IE instance?
   // 8 == "IeFrame\0"
   // 21 == "Shell DocObject View\0"
   // 19 == "Chrome_WidgetWin_1"
-  char name[21];
-  if (::GetClassNameA(hwnd, name, 21) == 0) {
+//  char name[21];
+ // if (::GetClassNameA(hwnd, name, 21) == 0) {
     // No match found. Skip
+  //  return TRUE;
+ // }
+
+ /* if (strcmp(IE_FRAME_WINDOW_CLASS, name) != 0 &&
+      strcmp(SHELL_DOCOBJECT_VIEW_WINDOW_CLASS, name) != 0) {
+    return TRUE;
+  }*/
+ // MessageBox(NULL, title, L"Hi!", MB_OK);
+
+
+  char title[17];
+  if (::GetWindowTextA(hwnd, title, 17) == 0) {
+    return true;
+  }
+ // int n = this->wpf_window_title.length();
+  ProcessWindowInfo* process_window_info = reinterpret_cast<ProcessWindowInfo*>(arg);
+  
+
+
+  MessageBox(NULL, s2ws(title).c_str(), L"Window Title info", MB_OK);
+  MessageBox(NULL, s2ws(process_window_info->wpf_window_title).c_str(), L"Window Expected Title info", MB_OK);
+
+
+
+  if (strcmp(process_window_info->wpf_window_title, title) != 0) {
+    MessageBox(NULL, L"Returning True! Title not equal to WPF Simple Browser", L"Hi!", MB_OK);
     return TRUE;
   }
 
-  if (strcmp(IE_FRAME_WINDOW_CLASS, name) != 0 &&
-      strcmp(SHELL_DOCOBJECT_VIEW_WINDOW_CLASS, name) != 0) {
-    return TRUE;
-  }
 
   return EnumChildWindows(hwnd, FindChildWindowForProcess, arg);
 }
@@ -1063,12 +1114,21 @@ BOOL CALLBACK BrowserFactory::FindChildWindowForProcess(HWND hwnd, LPARAM arg) {
   } else {
     DWORD process_id = NULL;
     ::GetWindowThreadProcessId(hwnd, &process_id);
-    LOG(DEBUG) << "Looking for " << process_window_info->dwProcessId;
-    if (process_window_info->dwProcessId == process_id) {
+  //  LOG(DEBUG) << "Looking for " << process_window_info->dwProcessId;
+   // if (process_window_info->dwProcessId == process_id) {
       // Once we've found the first Internet Explorer_Server window
       // for the process we want, we can stop.
-      process_window_info->hwndBrowser = hwnd;
-      return FALSE;
+    //  process_window_info->hwndBrowser = hwnd;
+    //  return FALSE;
+    CComPtr<IHTMLDocument2> document;
+    if (GetDocumentFromWindowHandle(hwnd, &document)){
+      CComBSTR url;
+      document->get_URL(&url);
+      std::wstring converted_url(url, ::SysStringLen(url));
+      if (converted_url.find(process_window_info->target_url) != std::string::npos) {
+        process_window_info->hwndBrowser = hwnd;
+        return false;
+      }
     }
   }
 

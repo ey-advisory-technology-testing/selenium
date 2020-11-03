@@ -18,6 +18,7 @@
 #define WEBDRIVER_IE_NEWSESSIONCOMMANDHANDLER_H_
 
 #include "../IECommandHandler.h"
+#include "../StringUtilities.h"
 
 namespace webdriver {
 

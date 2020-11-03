@@ -24,6 +24,8 @@
 #include "../InputManager.h"
 #include "../ProxyManager.h"
 #include "../WebDriverConstants.h"
+#include "../StringUtilities.h"
+#include <string>
 
 namespace webdriver {
 
@@ -377,6 +379,7 @@ void NewSessionCommandHandler::SetBrowserFactorySettings(const IECommandExecutor
                                                           false);
     factory_settings.ignore_zoom_setting = ignore_zoom_setting.asBool();
 
+
     Json::Value browser_attach_timeout = this->GetCapability(capabilities,
                                                              BROWSER_ATTACH_TIMEOUT_CAPABILITY,
                                                              Json::intValue,
@@ -425,6 +428,24 @@ void NewSessionCommandHandler::SetBrowserFactorySettings(const IECommandExecutor
                                                            Json::stringValue,
                                                            Json::Value(Json::stringValue));
     factory_settings.edge_executable_path = edge_executable_path.asString();
+
+    MessageBox(NULL, StringUtilities::ToWString(factory_settings.edge_executable_path).c_str(), L"executable path variable?", MB_OK);
+    Json::Value wpf_window_title = this->GetCapability(capabilities,
+      WPF_WINDOW_TITLE,
+      Json::stringValue,
+      Json::Value(Json::stringValue));
+    factory_settings.wpf_window_title = wpf_window_title.asString();
+    MessageBox(NULL, StringUtilities::ToWString(wpf_window_title.asString()).c_str(), L"win title variable?", MB_OK);
+
+    Json::Value find_with_url = this->GetCapability(capabilities,
+      FIND_WITH_URL,
+      Json::stringValue,
+      Json::Value(Json::stringValue));
+    factory_settings.find_with_url = find_with_url.asString();
+    MessageBox(NULL, StringUtilities::ToWString(find_with_url.asString()).c_str(), L"find with url variable?", MB_OK);
+
+
+
 
     IECommandExecutor& mutable_executor = const_cast<IECommandExecutor&>(executor);
     mutable_executor.browser_factory()->Initialize(factory_settings);

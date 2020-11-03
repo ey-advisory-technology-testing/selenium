@@ -25,6 +25,8 @@ struct ProcessWindowInfo {
   DWORD dwProcessId;
   HWND hwndBrowser;
   IWebBrowser2* pBrowser;
+  std::wstring target_url;
+  char wpf_window_title[17];
 };
 
 struct BrowserFactorySettings {
@@ -38,6 +40,9 @@ struct BrowserFactorySettings {
   std::string browser_command_line_switches;
   bool attach_to_edge_ie; // Used to attach to EdgeChromium IE processes
   std::string edge_executable_path;
+  std::string wpf_window_title;
+  std::string find_with_url;
+  
 };
 
 class BrowserFactory {
@@ -52,10 +57,10 @@ class BrowserFactory {
   IWebBrowser2* CreateBrowser(bool is_protected_mode);
   bool AttachToBrowser(ProcessWindowInfo* procWinInfo,
                        std::string* error_message);
-  bool GetDocumentFromWindowHandle(HWND window_handle,
+  static bool GetDocumentFromWindowHandle(HWND window_handle,
                                    IHTMLDocument2** document);
   bool IsBrowserProcessInitialized(DWORD process_id);
-
+  std::string get_wpf_window_title(void);
   bool ignore_protected_mode_settings(void) const { return this->ignore_protected_mode_settings_; }
   bool ignore_zoom_setting(void) const { return this->ignore_zoom_setting_; }
   bool clear_cache(void) const { return this->clear_cache_; }
@@ -83,8 +88,8 @@ class BrowserFactory {
                                         unsigned short minor_version,
                                         unsigned short service_pack);
 
-  UINT html_getobject_msg_;
-  HINSTANCE oleacc_instance_handle_;
+  static UINT html_getobject_msg_;
+  static HINSTANCE oleacc_instance_handle_;
 
   bool CreateLowIntegrityLevelToken(HANDLE* process_token_handle,
                                     HANDLE* mic_token_handle,
@@ -129,6 +134,8 @@ class BrowserFactory {
 
   bool edge_ie_mode_;
   std::wstring edge_executable_location_;
+  std::string wpf_window_title;
+  std::string find_with_url;
 };
 
 } // namespace webdriver
