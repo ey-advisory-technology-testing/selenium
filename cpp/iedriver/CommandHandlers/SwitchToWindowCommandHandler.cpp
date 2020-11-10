@@ -18,6 +18,8 @@
 #include "errorcodes.h"
 #include "../Browser.h"
 #include "../IECommandExecutor.h"
+#include "../StringUtilities.h"
+#include "../BrowserFactory.h"
 
 namespace webdriver {
 
@@ -37,7 +39,19 @@ void SwitchToWindowCommandHandler::ExecuteInternal(
     return;
   } else {
     std::string found_browser_handle = "";
-    std::string desired_name = name_parameter_iterator->second.asString();	  
+    std::string desired_name = name_parameter_iterator->second.asString();
+    //MessageBox(NULL, StringUtilities::ToWString(desired_name).c_str(), L"Desired name is...", MB_OK);
+    if (desired_name.rfind("http://", 0) == 0) {
+      ProcessWindowInfo process_window_info = webdriver::ProcessWindowInfo();
+    //  process_window_info.
+    //  std::string error_message = "Unable to fine browser window with url " + desired_name;
+    //  BrowserFactory::AttachToBrowserUsingActiveAccessibility();
+    }
+
+    else if (desired_name.rfind("https://", 0) == 0) {
+    //  BrowserFactory::AttachToBrowserUsingActiveAccessibility();
+    }
+    
 
     unsigned int limit = 10;
     unsigned int tries = 0;

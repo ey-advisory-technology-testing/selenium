@@ -136,9 +136,9 @@ void BrowserFactory::Initialize(BrowserFactorySettings settings) {
   this->edge_executable_location_ = StringUtilities::ToWString(settings.edge_executable_path);
   LOG(DEBUG) << "path after was " << this->edge_executable_location_.c_str() << "\n";
   this->html_getobject_msg_ = ::RegisterWindowMessage(HTML_GETOBJECT_MSG);
-  MessageBox(NULL, StringUtilities::ToWString(settings.wpf_window_title).c_str(), L"Hello, World!", MB_OK);
+  //MessageBox(NULL, StringUtilities::ToWString(settings.wpf_window_title).c_str(), L"Hello, World!", MB_OK);
   this->wpf_window_title = settings.wpf_window_title;
-  MessageBox(NULL, StringUtilities::ToWString(this->wpf_window_title).c_str(), L"Hello, World!", MB_OK);
+  //MessageBox(NULL, StringUtilities::ToWString(this->wpf_window_title).c_str(), L"Hello, World!", MB_OK);
   this->find_with_url = settings.find_with_url;
 
   // Explicitly load MSAA so we know if it's installed
@@ -508,11 +508,11 @@ bool BrowserFactory::AttachToBrowserUsingActiveAccessibility
   std::getline(infile, line);
   */
   process_window_info->target_url = StringUtilities::ToWString(this->find_with_url);
-  MessageBox(NULL, StringUtilities::ToWString(this->wpf_window_title).c_str(), L"Hello, World!", MB_OK);
+  //MessageBox(NULL, StringUtilities::ToWString(this->wpf_window_title).c_str(), L"Hello, World!", MB_OK);
   strcpy(process_window_info->wpf_window_title, this->wpf_window_title.c_str());
 
 
-  MessageBox(NULL, L"URL is...", process_window_info->target_url.c_str(), MB_OK);
+  //MessageBox(NULL, L"URL is...", process_window_info->target_url.c_str(), MB_OK);
 
   clock_t end = clock() + (this->browser_attach_timeout_ / 1000 * CLOCKS_PER_SEC);
   while (process_window_info->hwndBrowser == NULL) {
@@ -1069,13 +1069,13 @@ BOOL CALLBACK BrowserFactory::FindBrowserWindow(HWND hwnd, LPARAM arg) {
   
 
 
-  MessageBox(NULL, s2ws(title).c_str(), L"Window Title info", MB_OK);
-  MessageBox(NULL, s2ws(process_window_info->wpf_window_title).c_str(), L"Window Expected Title info", MB_OK);
+  //MessageBox(NULL, s2ws(title).c_str(), L"Window Title info", MB_OK);
+  //MessageBox(NULL, s2ws(process_window_info->wpf_window_title).c_str(), L"Window Expected Title info", MB_OK);
 
 
 
   if (strcmp(process_window_info->wpf_window_title, title) != 0) {
-    MessageBox(NULL, L"Returning True! Title not equal to WPF Simple Browser", L"Hi!", MB_OK);
+   // MessageBox(NULL, L"Returning True! Title not equal to WPF Simple Browser", L"Hi!", MB_OK);
     return TRUE;
   }
 

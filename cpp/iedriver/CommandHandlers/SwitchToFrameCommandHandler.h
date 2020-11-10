@@ -18,6 +18,7 @@
 #define WEBDRIVER_IE_SWITCHTOFRAMECOMMANDHANDLER_H_
 
 #include "../IECommandHandler.h"
+#include "../BrowserFactory.h"
 
 namespace webdriver {
 
